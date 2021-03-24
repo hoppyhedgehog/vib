@@ -1,6 +1,6 @@
 #!/bin/bash
 ###################################################################
-#LAST MODIFIED: 2021-03-23 10:04:40
+#LAST MODIFIED: 2021-03-24 00:55:37
 ###################################################################
 ###################################################################
 ###################################################################
@@ -22,12 +22,28 @@ HOSTNAME=$(hostname)
 #
 #
 ###################################################################
+# MAIN LOCATION OF VIB
+###################################################################
+VIB_MAIN=/usr/local/bin
+
+###################################################################
+# CHECK OS TYPE
+###################################################################
+
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Linux*)     machine=Linux;;
+    Darwin*)    machine=Mac;;
+    CYGWIN*)    machine=Cygwin;;
+    *)          machine="UNKNOWN:${unameOut}"
+esac
+
 ###################################################################
 # VERIFY THAT THE CURRENT PATH CONTAINS THE BASIC SYSTEM
 # PATHS IN THE CURRENT $PATH VARIABLE
 ###################################################################
 # Define required paths in array
-system_paths_arr=( "/bin" "/sbin" "/usr/bin" "/usr/sbin" "/usr/local/bin" "/opt/omcld/bin" "/opt/omutils/bin" "/opt/omg/bin")
+system_paths_arr=( "/bin" "/sbin" "/usr/bin" "/usr/sbin" "/usr/local/bin" )
 #
 p=0
 for i in "${!system_paths_arr[@]}"; do
@@ -45,7 +61,7 @@ if [ $p -lt ${#system_paths_arr[@]} ]; then
                 tp=$tp:${system_paths_arr[$i]}
             fi
         done
-        export PATH=$tp:$PATH
+        export PATH=$PATH:$tp
 fi
 ###################################################################
 # function to create directories
@@ -81,15 +97,46 @@ f_md(){
         fi
 }
 ###################################################################
-# MAIN LOCATION OF VIB
-###################################################################
-VIB_MAIN=/usr/local/bin
-###################################################################
 if [ ! -f $VIB_MAIN/vib ]; then
 	echo "ERROR: Expected to find $VIB_MAIN/vib. Edit vib configuration"
 	echo "To reflect the correct location"
 fi
 ###################################################################
+# Function to 'stat' a file.
+#
+# ON MAC OSX the 'stat' command is different than on Linux
+# Therefore we need to verify it is the proper version
+###################################################################
+statfile() {
+		local file="$1"
+		local option="$2"
+		if [ -z $option ]; then
+			
+			if [ $(stat -c %y "$file"  >/dev/null 2>&1; echo $?) != 0 ]; then
+				 stat -f "%Sm" -t "%Y-%m-%d %H:%M:%S"
+			else
+				stat -c %y "$file" |cut -d. -f1
+			fi
+
+		elif [ $option == 1 ]; then 		# 1 is designated for obtaining permissions
+
+			if [ $(stat -c %a "$file"  >/dev/null 2>&1; echo $?) != 0 ]; then
+				stat -f "%Lp" $file
+			else
+				stat -c %a "$file" 
+			fi
+
+		elif [ $option == 2 ]; then		# 2 is to obtain the total size in bytes
+
+			if [ $(stat -c %s "$file"  >/dev/null 2>&1; echo $?) != 0 ]; then
+				stat -f "%z"  "$file"
+			else
+				stat -c %s "$file" 
+			fi
+		fi
+}
+	
+		
 ###################################################################
 #
 # Gather User ID
@@ -250,7 +297,7 @@ PROMPT=0
 # VIB LOG FILE
 #
 ###################################################################
-if [ $(stat -c %a $VIBROOT) != "6777" ]; then
+if [ $(statfile $VIBROOT 1) != "6777" ]; then
         chmod -R 6777 $VIBROOT  >/dev/null 2>&1
 fi
 LOGFILE="$VIBROOT/vib-history.log"
@@ -407,15 +454,16 @@ EXAMPLES
 $HASH_LINE
 
 
+$HASH_LINE
 EXAMPLE I
-echo $HASH_LINE
-echo
-echo This section illustrates using VIB with the default
-echo backup directory of /opt/vib
-echo 
-echo In other words you keep all backups in one location
-echo
-echo $HASH_LINE
+$HASH_LINE
+
+This section illustrates using VIB with the default
+backup directory of /opt/vib
+
+In other words you keep all backups in one location
+
+$HASH_LINE
 Set the following:
 
 BACKUP_DIRECTORY=/opt/vib
@@ -485,14 +533,14 @@ here is some more stuff
 
 $HASH_LINE
 EXAMPLE III
-echo $HASH_LINE
-echo
-echo This section describes saving all files in a designated
-echo backup location, while including the path to the files
-echo in the backup file name.
-echo
-echo $HASH_LINE
-echo
+$HASH_LINE
+
+This section describes saving all files in a designated
+backup location, while including the path to the files
+in the backup file name.
+
+$HASH_LINE
+
 
 Set the following:
 
@@ -568,7 +616,7 @@ here is some stuff
 here is some more stuff
 adding a bunch more stuff again
 #
-
+$HASH_LINE
 " |more;
 
 
@@ -841,7 +889,7 @@ fi
 ###################################################################
 add_change_date(){
 	if [ -z $noinsert ]; then
-		mod_date=$(stat -c %y "$INFILE_DIRECTORY/$INFILE_NAME"|cut -d. -f1)
+		mod_date=$(statfile "$INFILE_DIRECTORY/$INFILE_NAME")
 		# If the file already contains last modified
 		if [ $insert -gt  0 ]; then
 			sed -i "${insert}s/.*/\#LAST MODIFIED: $mod_date/" "$INFILE_DIRECTORY/$INFILE_NAME"
@@ -907,7 +955,7 @@ fi
 # check the filesize to see if it exceeds the max file size to edit and backup a file
 #
 if [ -f "$INFILE_DIRECTORY/$INFILE_NAME" ]; then
-	if  [ `stat --printf=%s $INFILE_DIRECTORY/$INFILE_NAME` -gt $MAX_INFILE_SIZE ]; then
+	if  [ $(statfile $INFILE_DIRECTORY/$INFILE_NAME 2) -gt $MAX_INFILE_SIZE ]; then
 		echo "Unable to backup file as MAX_INFILE_SIZE -->$MAX_INFILE_SIZE"
 		sleep 1
 		"$VIE" "$INFILE_DIRECTORY/$INFILE_NAME"
