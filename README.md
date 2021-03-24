@@ -1,5 +1,8 @@
 ###################################################################
-# VI [B]etter. VIB is a Wrapper for the VI editor that backs up the files being edited to a directory (depending on the configurable size of the file) and provides better revision control and file recovery.
+# VI [B]etter. VIB is a BASH SHELL SCRIPT Wrapper for the VI editor 
+that backs up the files being edited to a directory (depending on 
+the configurable size of the file) and provides better revision 
+control and file recovery.
 ###################################################################
 
 ###################################################################
@@ -41,14 +44,14 @@ EXAMPLES
 
 
 EXAMPLE I
-echo ###################################################################
-echo
-echo This section illustrates using VIB with the default
-echo backup directory of /opt/vib
-echo
-echo In other words you keep all backups in one location
-echo
-echo ###################################################################
+###################################################################
+
+This section illustrates using VIB with the default
+backup directory of /opt/vib
+
+In other words you keep all backups in one location
+ 
+###################################################################
 Set the following:
 
 BACKUP_DIRECTORY=/opt/vib
