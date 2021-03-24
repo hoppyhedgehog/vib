@@ -1,10 +1,18 @@
-# vib
-VI [B]etter. VIB is a Wrapper for the VI editor that backs up the files being edited to a directory (depending on the configurable size of the file) and provides better revision control and file recovery.
+###################################################################
+# VI [B]etter. VIB is a Wrapper for the VI editor that backs up the files being edited to a directory (depending on the configurable size of the file) and provides better revision control and file recovery.
+###################################################################
 
-# vib -h
 ###################################################################
 [VI] [B]ackup utility (VIB)
 by ben@datastorageguy.com v6.0
+###################################################################
+
+
+###################################################################
+USAGE (to view full readme)
+# vib -h
+###################################################################
+
 ###################################################################
 OVERVIEW:
 ###################################################################
