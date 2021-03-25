@@ -1,59 +1,55 @@
-`###################################################################
-# VI [B]etter. VIB is a BASH SHELL SCRIPT Wrapper for the VI editor 
-that backs up the files being edited to a directory (depending on 
-the configurable size of the file) and provides better revision 
-control and file recovery.
-###################################################################
 
-###################################################################
-[VI] [B]ackup utility (VIB)
-by ben@datastorageguy.com v6.0
-###################################################################
+# VI [B]ackup
 
+> VIB is a BASH SHELL SCRIPT Wrapper for the VI editor 
+> that backs up the files being edited to a directory (depending on 
+> the configurable size of the file) and provides better revision 
+> control and file recovery.
 
-###################################################################
-USAGE (to view full readme)
+* By ben@datastorageguy.com v6.0*
+
+## USAGE (to view full readme)
+```
 # vib -h
-###################################################################
+```
 
-###################################################################
-OVERVIEW:
-###################################################################
+
+## OVERVIEW:
+
 This tool is designed to create backup files of any
 file edited using the VI (VIM) editor. It allows you to
 backup the files in a default subdirectory of
 /opt/vib, or the option to create backups in the
-'current' working directory (not advised)
+current working directory (not advised)
 
 By default, VIB adds the user name to the file name and
 it also allows you to add the directory name to the
 file name that is saved if you back it up to a specified
 destination directory.
 
-###################################################################
-TO RESET BACK TO THE DEFAULT WHERE:
-###################################################################
+
+## TO RESET BACK TO THE DEFAULT WHERE:
+
 Issue:
+```
 	# vi -r
+```
 
-	This re-sets 'alias vi=/usr/bin/vim'
+*This re-sets 'alias vi=/usr/bin/vim'*
 
-###################################################################
-EXAMPLES
-###################################################################
+## EXAMPLES
 
 
-EXAMPLE I
-###################################################################
+### EXAMPLE I
 
 This section illustrates using VIB with the default
 backup directory of /opt/vib
 
 In other words you keep all backups in one location
  
-###################################################################
+ 
 Set the following:
-
+```
 BACKUP_DIRECTORY=/opt/vib
 USEDIR=0
 #---------------------------
@@ -116,22 +112,22 @@ drwxrwxrwx    8 root     root         4096 Jul 23 14:17 ..
 here is some stuff
 here is some more stuff
 #
+```
 
 
 
-###################################################################
-EXAMPLE III
-###################################################################
+## EXAMPLE III
 
- This section describes saving all files in a designated
- backup location, while including the path to the files
- in the backup file name.
+This section describes saving all files in a designated
+backup location, while including the path to the files
+in the backup file name.
 
-###################################################################
+
 
 
 Set the following:
 
+```
 BACKUP_DIRECTORY=/var/tmp/viblogs
 USEDIR=1
 #---------------------------
@@ -222,4 +218,4 @@ here is some stuff
 here is some more stuff
 adding a bunch more stuff again
 #
-`
+```
