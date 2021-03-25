@@ -31,7 +31,7 @@ destination directory.
 
 The script usage options are:
 ```
-]# vib -?
+# vib -?
 -------------------------------------------------------------------
 [V][I] [B]ackup Wrapper
 by ben@datastorageguy.com
