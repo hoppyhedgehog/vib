@@ -6,7 +6,6 @@
 > the configurable size of the file) and provides better revision 
 > control and file recovery.
 
-*By ben@datastorageguy.com v6.0*
 
 ## USAGE (to view full readme)
 ```
