@@ -27,15 +27,73 @@ it also allows you to add the directory name to the
 file name that is saved if you back it up to a specified
 destination directory.
 
+# USAGE 
+
+The script usage options are:
+```
+]# vib -?
+-------------------------------------------------------------------
+[V][I] [B]ackup Wrapper
+by ben@datastorageguy.com
+
+usage:
+  # vi [-h|-e|-d|-n|-r|-t|-v]  <file>
+	-h Display detailed help/usage
+	-e Enable VIB
+	-d Disable VIB
+	-n Disable all Last Modification prepending
+	-r Uninstall-Reset the alias to default
+	-t Enable add Last Modification Date to
+	   second line of <file>
+	   *note: Default for any scripts
+	-v Verbose (debug) output
+-------------------------------------------------------------------
+```
+
+
+# INSTALLATION
+
+Installing VIB involves:
+- manually copying the file to /usr/local/bin 
+*(or your preferred directory)*
+- Using the 'vib' command to edit files, OR 
+	- Enable vib via the '-e' option to alias vi and vim command
+
+## Example setting Alias to vi
+```
+# vib -e
+-------------------------------------------------------------------
+ENABLED VIB
+REMOVED FILE: /var/tmp/.novib
+-------------------------------------------------------------------
+```
+
+How we see the alias
+```
+# alias |grep vib
+alias vi='/usr/local/bin/vib'
+```
+
 
 ## TO RESET BACK TO THE DEFAULT WHERE:
 
 Issue:
 ```
-	# vi -r
+# vi -r
+```
+*This re-sets 'alias vi=/usr/bin/vim'*
+
+results:
+```
+#################################################################
+Reset vi back using:
+	 # alias vi=/usr/bin/vim'
+#################################################################
+#
+# alias |grep vi
+#
 ```
 
-*This re-sets 'alias vi=/usr/bin/vim'*
 
 ## EXAMPLES
 
