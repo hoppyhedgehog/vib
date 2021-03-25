@@ -37,17 +37,16 @@ The script usage options are:
 by ben@datastorageguy.com
 
 usage:
-  # vi [-h|-e|-d|-n|-r|-t|-v]  <file>
+  # vi [-h|-e|-d|-l|-n|-r|-t|-v]  <file>
 	-h Display detailed help/usage
 	-e Enable VIB
 	-d Disable VIB
+	-l Enable add Last Modification Date (Default is Enabled)
 	-n Disable all Last Modification prepending
 	-r Uninstall-Reset the alias to default
-	-t Enable add Last Modification Date to
-	   second line of <file>
+	-t FORCE Enable add Last Modification Date to <file>
 	   *note: Default for any scripts
 	-v Verbose (debug) output
--------------------------------------------------------------------
 ```
 
 
@@ -75,27 +74,31 @@ alias vi='/usr/local/bin/vib'
 ```
 
 
-## TO RESET BACK TO THE DEFAULT WHERE:
 
-Issue:
+By default VIB appends the date/timestamp to the top of the file for BASH/KSH/PERL/SH Scripts
+Example. Viewing file teststuff.sh and adding 'echo World' to the end of the file:
 ```
-# vi -r
-```
-*This re-sets 'alias vi=/usr/bin/vim'*
-
-results:
-```
-#################################################################
-Reset vi back using:
-	 # alias vi=/usr/bin/vim'
-#################################################################
-#
-# alias |grep vi
+#vi teststuff.sh
+#!/bin/bash
+###################################################################
+# Script to test stuff
+#################################################
+echo "Hello"
+echo "World"
 #
 ```
 
+Re-editing the file and now wee see the last modification time!
+```
+#!/bin/bash
+################################################
+#LAST MODIFIED: 2021-03-24 20:32:02
+#################################################
+echo "Hello"
+echo "World"
+```
 
-## EXAMPLES
+## BACKUP FILE EXAMPLES
 
 
 ### EXAMPLE I
@@ -337,6 +340,27 @@ here is some stuff
 here is some more stuff
 adding a bunch more stuff again
 here I go again
+```
+
+
+
+## TO RESET BACK TO THE DEFAULT WHERE:
+
+Issue:
+```
+# vi -r
+```
+*This re-sets 'alias vi=/usr/bin/vim'*
+
+results:
+```
+#################################################################
+Reset vi back using:
+	 # alias vi=/usr/bin/vim'
+#################################################################
+#
+# alias |grep vi
+#
 ```
 
 
