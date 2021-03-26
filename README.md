@@ -363,4 +363,10 @@ Reset vi back using:
 ```
 
 
+# License
 
+Distributed under GPL 3
+
+# Disclaimer
+
+This software is provided "as is", without warranty of any kind, express or implied.
