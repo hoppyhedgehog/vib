@@ -1,7 +1,5 @@
 #!/bin/bash
 ###################################################################
-#LAST MODIFIED: 2021-03-24 19:49:40
-###################################################################
 ###################################################################
 ###################################################################
 shopt -s expand_aliases
@@ -13,11 +11,14 @@ shopt -s expand_aliases
 AUTHOR="ben@datastorageguy.com"
 SCRIPT=$(basename ${BASH_SOURCE[0]})
 ###################################################################
+# LOCATION: https://github.com/hoppyhedgehog/vib
+###################################################################
+###################################################################
 # License:	GPL 
 #
 # *Note: Shell MUST be in BASH or KSH
 #
-VERSION=6.0
+VERSION=6.1
 HOSTNAME=$(hostname)
 #
 #
@@ -37,6 +38,48 @@ case "${unameOut}" in
     CYGWIN*)    machine=Cygwin;;
     *)          machine="UNKNOWN:${unameOut}"
 esac
+
+###################################################################
+# DETERMINE TYPE OF SED USED
+###################################################################
+	case $machine in
+		Mac)
+			if [ -f /usr/local/bin/sed ]; then
+					SED=/usr/local/bin/sed
+			elif [ -f /usr/local/sbin/sed ]; then
+					SED=/usr/local/sbin/sed
+			elif [ -f /usr/local/share/sed ]; then
+					SED=/usr/local/share/sed
+			elif [ -f /usr/bin/sed ]; then
+					SED=/usr/bin/sed
+					msed=1
+			elif [ -f /bin/sed ]; then
+					SED=/bin/sed
+					msed=1
+			else
+				echo "ERROR: Unable to locate sed"
+				exit 1
+			fi
+			;;
+		*)
+			if [ -f /usr/local/bin/sed ]; then
+					SED=/usr/local/bin/sed
+			elif [ -f /usr/local/sbin/sed ]; then
+					SED=/usr/local/sbin/sed
+			elif [ -f /usr/local/share/sed ]; then
+					SED=/usr/local/share/sed
+			elif [ -f /usr/bin/sed ]; then
+					SED=/usr/bin/sed
+			elif [ -f /sbin/sed ]; then
+					SED=/sbin/sed
+			elif [ -f /bin/sed ]; then
+					SED=/bin/sed
+			else
+				echo"ERROR: Unable to locate sed"
+				exit 1
+			fi
+			;;
+	esac
 
 ###################################################################
 # VERIFY THAT THE CURRENT PATH CONTAINS THE BASIC SYSTEM
@@ -86,7 +129,11 @@ f_md(){
 
         if [ $stop == 0 ] && [ ! -d "$arg" ]; then
             mkdir -p "$arg" >/dev/null 2>&1
-            return 0
+	    if [ $? == 0 ]; then
+            	return 0
+	    else
+		stop=1
+	    fi
         else
             stop=1
         fi
@@ -95,6 +142,7 @@ f_md(){
                 echo "ERROR: Problem creating directory [$arg]"
                 exit 1
         fi
+
 }
 ###################################################################
 if [ ! -f $VIB_MAIN/vib ]; then
@@ -193,7 +241,7 @@ VIB_SUBDIR="vib"
 ###################################################################
 # Verify VIB_SUBDIR is in the correct Format
 ###################################################################
-VIB_SUBDIR=$(echo $VIB_SUBDIR|sed 's/^\/\(.*\)\/$/\1/g')
+VIB_SUBDIR=$(echo $VIB_SUBDIR|$SED 's/^\/\(.*\)\/$/\1/g')
 ###################################################################
 #
 # Specify the fully qualified path to the backup 
@@ -205,6 +253,7 @@ VIB_SUBDIR=$(echo $VIB_SUBDIR|sed 's/^\/\(.*\)\/$/\1/g')
 # and a .backup directory is created
 #
 ###################################################################
+
 BACKUP_DIRECTORY=/opt/$VIB_SUBDIR
 f_md $BACKUP_DIRECTORY
 
@@ -428,7 +477,7 @@ $HASH_LINE
 [VI] [B]ackup utility (VIB)
 by $AUTHOR v$VERSION
 $HASH_LINE
-OVERVIEW:
+USAGE:
 $HASH_LINE
 This tool is designed to create backup files of any 
 file edited using the VI (VIM) editor. It allows you to 
@@ -746,18 +795,18 @@ rotatelogs()
 	fi
 }
 ###################################################################
-# Create Alias 'VIE' for the VI Editor'
+# Create Alias 'VI_BINARY' for the VI Editor'
 ###################################################################
 if [ -f /usr/bin/vim ]; then
-        VIE=/usr/bin/vim
+        VI_BINARY=/usr/bin/vim
 elif [ -f /usr/local/bin/vim ]; then
-        VIE=/usr/local/bin/vim
+        VI_BINARY=/usr/local/bin/vim
 elif [ -f /usr/local/bin/vi ]; then
-        VIE=/usr/local/bin/vi
+        VI_BINARY=/usr/local/bin/vi
 elif [ -f /usr/bin/vi ]; then
-        VIE=/usr/bin/vi
+        VI_BINARY=/usr/bin/vi
 elif [ -f /bin/vi ]; then
-        VIE=/bin/vi
+        VI_BINARY=/bin/vi
 else
         echo "VI Editor not found .."
         exit;
@@ -765,7 +814,7 @@ fi
 ###################################################################
 setvib() {
 		if [ $(grep -q "alias vi=.*vib" $HOME/.bashrc; echo $?) != 0 ]; then
-			sed -i  "s:alias vi=.*$:alias vi=\"$VIB_MAIN\":g" $HOME/.bashrc
+			$SED -i  "s:alias vi=.*$:alias vi=\"$VIB_MAIN\":g" $HOME/.bashrc
 			source $HOME/.bashrc
 		fi
 }
@@ -812,7 +861,7 @@ while getopts ':hnletvdr' OPT_NAME; do
 		echo $LINE
 		exit;;
       ("r")  
-		sed -i "s:alias vi=.*$:alias vi=\"/usr/bin/vim\":g" $HOME/.bashrc
+		$SED -i "s:alias vi=.*$:alias vi=\"/usr/bin/vim\":g" $HOME/.bashrc
 		source $HOME/.bashrc;
 		echo $LINE
 		echo "Reset vi back using:"
@@ -826,7 +875,7 @@ done
 
 if [ ! -z $setvib ]; then
 	if [ $(grep -q "alias vi=.*vib" $HOME/.bashrc; echo $?) != 0 ]; then
-		sed -i  "s:alias vi=.*$:alias vi=\"$VIB_MAIN\":g" $HOME/.bashrc
+		$SED -i  "s:alias vi=.*$:alias vi=\"$VIB_MAIN\":g" $HOME/.bashrc
 		source $HOME/.bashrc
 	fi
 fi
@@ -846,10 +895,22 @@ if [ $USEDIR != 0 ] && [ $BACKUP_DIRECTORY = ".vib_backup" ]; then
 fi
 ###################################################################
 ###################################################################
+m_readlink() {
+    [ "." = "${1}" ] && n=${PWD} || n=${1}; while nn=$( readlink -n "$n" ); do n=$nn; done; echo "$n"
+}
 ###################################################################
 fp () {
-  f=`readlink -f $1`
-  dirname "$f"
+	
+	if [ $machine != "Mac" ]; then
+		f=$(readlink -f $1)
+	else
+		f=$(m_readlink $1)
+	fi
+	local dir=$(dirname "$f")
+	if [ "$dir" == "." ]; then
+		dir=$(pwd)
+	fi
+	echo $dir
 }
 ###################################################################
 #GATHERING INPUT
@@ -878,7 +939,7 @@ INFILE_DIRECTORY=$(fp "$NAME")
 f_md $BACKUP_DIRECTORY
 ###################################################################
 ###################################################################
-# edit file using VIE
+# edit file using VI_BINARY
 ###################################################################
 # if USEDIR is set to 1, then set the INFILE_NAME
 # to the INPUT variable and change the assign
@@ -904,26 +965,31 @@ fi
 # Function to append the date changed based on when it was modified
 ###################################################################
 add_change_date(){
+	if [ ! -z $msed ]; then
+		msedvar="''"
+	else
+		msedvar=
+	fi
 	if [ -z $noinsert ]; then
 		mod_date=$(statfile "$INFILE_DIRECTORY/$INFILE_NAME")
 		# If the file already contains last modified
 		if [ $insert -gt  0 ]; then
-			sed -i "${insert}s/.*/\#LAST MODIFIED: $mod_date/" "$INFILE_DIRECTORY/$INFILE_NAME"
+			$SED -i $msedvar  "${insert}s/.*/\#LAST MODIFIED: $mod_date/" "$INFILE_DIRECTORY/$INFILE_NAME"
 			echo "Updated -->  LAST MODIFIED: $mod_date" 
 		# if there is no last modify, forcedate is set and file is NOT a script
 		elif [ $insert == 0 ] && [ ! -z $forcedate ] && [ -z $script ];  then
-			sed -i "1i$HASH_LINE\n\#LAST MODIFIED: $mod_date\n$HASH_LINE" "$INFILE_DIRECTORY/$INFILE_NAME"
+			$SED -i $msedvar "1i$HASH_LINE\n\#LAST MODIFIED: $mod_date\n$HASH_LINE" "$INFILE_DIRECTORY/$INFILE_NAME"
 			echo "Added atop file -->  LAST MODIFIED: $mod_date" 
 		# if there is no last modify, and file is NOT a script
 		elif [ $insert == 0 ] && [ -z $script ]; then
-			sed -i "1i$HASH_LINE\n\#LAST MODIFIED: $mod_date\n$HASH_LINE" "$INFILE_DIRECTORY/$INFILE_NAME"
+			$SED -i $msedvar "1i$HASH_LINE\n\#LAST MODIFIED: $mod_date\n$HASH_LINE" "$INFILE_DIRECTORY/$INFILE_NAME"
 			echo "Added atop file -->  LAST MODIFIED: $mod_date" 
 		# if there is no last modify, and file  IS A SCRIPT
 		elif [ $insert == 0 ] && [ ! -z $script ]; then
-			sed -i "2i$HASH_LINE\n\#LAST MODIFIED: $mod_date\n$HASH_LINE" "$INFILE_DIRECTORY/$INFILE_NAME"
+			$SED -i $msedvar "2i$HASH_LINE\n\#LAST MODIFIED: $mod_date\n$HASH_LINE" "$INFILE_DIRECTORY/$INFILE_NAME"
 			echo "Added atop file -->  LAST MODIFIED: $mod_date" 
 		else
-			sed -i "${insert}i$HASH_LINE\n\#LAST MODIFIED: $mod_date\n$HASH_LINE" "$INFILE_DIRECTORY/$INFILE_NAME"
+			$SED -i $msedvar "${insert}i$HASH_LINE\n\#LAST MODIFIED: $mod_date\n$HASH_LINE" "$INFILE_DIRECTORY/$INFILE_NAME"
 			echo "Added atop file -->  LAST MODIFIED: $mod_date" 
 		fi
 	fi
@@ -967,14 +1033,17 @@ if [ ! -f $NOTIME ] && [ -f "$INFILE_DIRECTORY/$INFILE_NAME" ]; then
 	check_script
 fi
 
+###################################################################
 #
 # check the filesize to see if it exceeds the max file size to edit and backup a file
 #
+###################################################################
+
 if [ -f "$INFILE_DIRECTORY/$INFILE_NAME" ]; then
 	if  [ $(statfile $INFILE_DIRECTORY/$INFILE_NAME 2) -gt $MAX_INFILE_SIZE ]; then
 		echo "Unable to backup file as MAX_INFILE_SIZE -->$MAX_INFILE_SIZE"
 		sleep 1
-		"$VIE" "$INFILE_DIRECTORY/$INFILE_NAME"
+		"$VI_BINARY" "$INFILE_DIRECTORY/$INFILE_NAME"
 		exit
 	fi
 fi
@@ -983,7 +1052,7 @@ fi
 if [ ! -f "$INFILE_DIRECTORY/$INFILE_NAME" ]; then
 	if [[ (( -n "$2" ) && ( "$2" = "n" )) || ( $MAKE_NEW == 1 )  ]]; then
 		echo "Creating $INFILE_NAME"
-		"$VIE" "$INFILE_DIRECTORY/$INFILE_NAME"
+		"$VI_BINARY" "$INFILE_DIRECTORY/$INFILE_NAME"
 		if [ ! -f "$INFILE_DIRECTORY/$INFILE_NAME" ]; then
 			no=1
 		else
@@ -1001,7 +1070,7 @@ else
 		cp -p -f "$INFILE_DIRECTORY/$INFILE_NAME" "$BACKUP_DIRECTORY/${INFILE_NAME}.${MYID}.1" > /dev/null 2>&1
 	fi
 	cp -pf "$INFILE_DIRECTORY/$INFILE_NAME" "$TMPFILE" > /dev/null 2>&1
-	"$VIE" "$INFILE_DIRECTORY/$INFILE_NAME"
+	"$VI_BINARY" "$INFILE_DIRECTORY/$INFILE_NAME"
 
 	if [ ! -f "$INFILE_DIRECTORY/$INFILE_NAME" ]; then
 		no=1
