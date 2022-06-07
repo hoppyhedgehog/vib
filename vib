@@ -1,33 +1,81 @@
 #!/bin/bash
 ###################################################################
-#LAST MODIFIED: 2022-02-16 13:36:42
+#LAST MODIFIED: 2022-06-07T13:57:14
 #USING [VIB] https://github.com/hoppyhedgehog/vib
 ###################################################################
+# DOCUMENTATION/ LOCATION: https://github.com/hoppyhedgehog/vib
+###################################################################
+# *Note: Shell MUST be in BASH or KSH or ZSH
+###################################################################
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+#
+###################################################################
+#
+VERSION=8.3
+#
+###################################################################
+PS4='${LINENO}: '
+###################################################################
+SCRIPT=$(basename ${BASH_SOURCE[0]})
 ###################################################################
 shopt -s expand_aliases
 ###################################################################
 #
 # VI Editor Backup Utility (VIB)
 #
-# By
-AUTHOR="ben@datastorageguy.com"
-SCRIPT=$(basename ${BASH_SOURCE[0]})
+# Created By
 ###################################################################
-# LOCATION: https://github.com/hoppyhedgehog/vib
+AUTHOR="bpatridge@tintri.com"
+
+
+###################################################################
+# DEFAULT BASE DIRECTORY FOR VIB [/usr/local ]
+#       However it may be changed to /opt or any other location
+###################################################################
+BASEDIR=/usr/local
+
+###################################################################
+# DEFAILT 'bin' LOCATION OF VIB [$BASEDIR/bin]
+#       However it may be changed to /opt or any other location
+###################################################################
+VIB_DEFAULT_LOCATION=$BASEDIR/bin
+###################################################################
+
+
+
+
+
 ###################################################################
 ###################################################################
-# License:	GPL 
-#
-# *Note: Shell MUST be in BASH or KSH
-#
-VERSION=6.6
-HOSTNAME=$(hostname)
-#
-#
+###################################################################
 ###################################################################
 #
 # CONFIGURABLE SETTINGS
 #
+###################################################################
+###################################################################
 ###################################################################
 ###################################################################
 #
@@ -39,40 +87,37 @@ MAX=10
 
 ###################################################################
 #
-# If file to edit is larger than MAX_INFILE_SIZE
+# If file to edit is larger than MAX_USER_SUPPLIED_FILE_SIZE
 # then do not make a backup
 ###################################################################
 
-MAX_INFILE_SIZE=5000000
+MAX_USER_SUPPLIED_FILE_SIZE=5000000				# 5GB
 
 ###################################################################
 # MAIN LOCATION OF VIB
-# default is HOME/bin/
-#	However it may be changed to /opt or any other location
+# default is /usr/local/bin
 ###################################################################
-VIB_MAIN=$HOME/bin/vib
+VIB_BINARY=$VIB_DEFAULT_LOCATION/vib
+
 ###################################################################
 # IF There is a need to log results, backupfiles/etc to a specific
 # subdirectory, then specify it here
 # otherwise, the default will be used:
 #
 # DEFAULT:
-#               Default VIB_SUBDIR="vib"
+#               Default $SCRIPT
 #                       example:
-#                       Log directory = /var/log/$VIB_SUBDIR
+#                       Log directory = /var/log/$SCRIPT
 #
 # ALTERNATE EXAMPLE 1:
 #       If you wish to log to /var/log/omg/vib
-#       Then you would specify "omg/vib" as the 'root' VIB_SUBDIR
+#       Then you would specify "omg/vib" as the 'root' $SCRIPT
 #
 # ALTERNATE EXAMPLE 2
 #       If you wish to log to the default of /var/log/vib
-#       Then you would specify "vib" as the 'root' VIB_SUBDIR
+#       Then you would specify "vib" as the 'root' $SCRIPT
 ###################################################################
 #
-VIB_SUBDIR="vib"
-#
-###################################################################
 #
 # Specify the fully qualified path to the backup
 # directory. (ex) /opt/vib
@@ -84,7 +129,8 @@ VIB_SUBDIR="vib"
 #
 ###################################################################
 
-BACKUP_DIRECTORY=$HOME/$VIB_SUBDIR
+BACKUP_DIRECTORY=$BASEDIR/${SCRIPT}_backups
+
 ###################################################################
 # PROMPTS: Do not prompt to commit changes
 # if CONFIRM_CHANGES = 0 (default) Prompt to save changes
@@ -102,8 +148,9 @@ MAKE_NEW=1
 ###################################################################
 # Notify the user a backup file is created
 # and the location of the backup file
-# BACKUP_NOTIFICATION = 0 (default) Notify userY
-# BACKUP_NOTIFICATION = 1 DO NOT  Notify userY
+#
+# BACKUP_NOTIFICATION = 0 (default) Notify user
+# BACKUP_NOTIFICATION = 1 DO NOT  Notify user
 ###################################################################
 BACKUP_NOTIFICATION=0
 
@@ -117,31 +164,51 @@ EXCLUDE_DIRECTORIES=
 # Specify whether to backup the file in the current
 # or the default backup diurectory
 #
-# 0 creates backup in the current directory in a
-#   directory called '.vib_backup'
-#
-# 1 creates backup in the specified backup directory
+# 0 creates backup in the specified backup directory
 # using the new BACKUP_DIRECTORY (default)
 #
+# 1 creates backup in the current directory in a
+#   directory called '.vib_backup'
+#
+#
 ###################################################################
-USEDIR=1
+USEDIR=0
 
 
 ###################################################################
-# MAIN LOG DIRECTORY FOR VIB
+# MAIN LOG BASE DIRECTORY FOR VIB
 ###################################################################
-LOGDIR="$HOME/logs"
+LOGDIR="$BASEDIR/logs"
 
 ###################################################################
-# MAIN VIB DIRECTORY
+# MAIN VIB LOG DIRECTORY
 ###################################################################
-VIBROOT=$LOGDIR/$VIB_SUBDIR
+VIBLOGS=$LOGDIR/${SCRIPT}
+
+###################################################################
+# LOG ALL Output
+# The following enables additional logging
+# 0 = no
+# 1 = yes
+###################################################################
+LOGALL=1
+
+###################################################################
+#
+# VIB LOG FILE
+#
+# Verify and setthe VIB LOG HISTORY FILE
+#
+###################################################################
+
+
+LOGFILE="$VIBLOGS/vib-history.$(date '+%Y-%m').log"
 
 
 ###################################################################
 # TEMP DIRECTORY FOR VIB CACHE FILES
 ###################################################################
-TMPDIR=$LOGDIR/$VIB_SUBDIR/tmp
+TMPDIR=$BASEDIR/tmp
 
 
 ##################################################################
@@ -205,13 +272,32 @@ VIB_COMMENT='USING \[VIB\] https://github.com/hoppyhedgehog/vib'
 
 
 
-
-
+###################################################################
+# OBTAIN SCRIPT NAME
+###################################################################
+SCRIPT=$(basename ${BASH_SOURCE[0]})
 
 
 
 ###################################################################
-# CHECK OS TYPE
+# OBTAIN SYSTEM HOST NAME
+###################################################################
+HOSTNAME=$(hostname)
+
+
+
+###################################################################
+# CHECK REQUIRED SYSTEM PATHS
+###################################################################
+
+for binpath in "/bin" "/usr/bin" "/sbin" "/usr/sbin"; do
+	if [ $(echo $PATH|fgrep -q "$binpath"; echo $?) != 0 ]; then
+		export PATH=$PATH:$binpath
+	fi
+done
+
+###################################################################
+# CHECK HOST OPERATING SYSTEM TYPE
 ###################################################################
 
 unameOut="$(uname -s)"
@@ -269,6 +355,7 @@ esac
 # PATHS IN THE CURRENT $PATH VARIABLE
 ###################################################################
 # Define required paths in array
+###################################################################
 system_paths_arr=( "/bin" "/sbin" "/usr/bin" "/usr/sbin" "/usr/local/bin" )
 #
 p=0
@@ -290,83 +377,122 @@ if [ $p -lt ${#system_paths_arr[@]} ]; then
         export PATH=$PATH:$tp
 fi
 ###################################################################
-# function to create directories
-# function creates some 'idiot proofing' so as not to create or remove
-# core system directories
+# FUNCTION TO WRITE ECHO'D OUTPUT TO INCLUDE DATE/TIME
+# TO TTY AND/OR LOGFILE
+###################################################################
+writelog()
+{
+        local LOGDATE=`date '+%Y-%m-%dT%H:%M:%S.%3'`
+        local user=`echo $MYID |tr "[:upper:]" "[:lower:]"`
+	local arg="$2"
+
+	if [ -z "$2" ]; then
+		echo "[$LOGDATE] : $1 "
+	else
+		case "$2" in
+			0) echo "$1";;
+			1) echo "[$LOGDATE] : $1"|tee -a $LOGFILE;;
+			2|q) echo "[$LOGDATE] $HOSTNAME $SCRIPT:  $user : | $1" & >> "$LOGFILE" ;;
+		esac
+	fi
+	if [  $LOGALL  == 1 ]; then
+			 echo "[$LOGDATE] $HOSTNAME $SCRIPT:  $user : | $1"  >> "$LOGFILE" 2>&1
+	fi
+}
+###################################################################
+###################################################################
+# function used to create directories
+# this function creates some 'idiot proofing' so as not to create or remove
+# important core system directories
 ###################################################################
 f_md(){
-        local arg="$1"
-        local stop=0
-        if [ -d $arg ]; then
-            return 0
-        fi
+	local arg="$1"
+	local stop=0
+	if [ -d $arg ]; then
+	    return 0
+	fi
 
-        if [ -f "$arg" ]; then
-            stop=1
-        fi
-        arr_safety=( "/" "/bin" "/boot" "/corefiles" "/dev" "/etc" "/home" "/lib" "/lib64" "/lost+found" "/media" "/misc" "/mnt" "/net"  "/opt" "/proc" "/sbin" "/selinux"  "/sys" "/   tftpboot"  "/usr" "/var" "/usr/local/bin" "/usr/bin" "/usr/sbin" )
+	if [ -f "$arg" ]; then
+	    stop=1
+	fi
+	arr_safety=( "/" "/bin" "/boot" "/corefiles" "/dev" "/etc" "/home" "/lib" "/lib64" "/lost+found" "/media" "/misc" "/mnt" "/net"  "/opt" "/proc" "/sbin" "/selinux"  "/sys" "/   tftpboot"  "/usr" "/var" "/usr/local/bin" "/usr/bin" "/usr/sbin" )
 
-        for check in ${arr_safety[@]}; do
-            if [ $arg == $check ]; then
-                stop=1
-            fi
-        done
+	for check in ${arr_safety[@]}; do
+	    if [ $arg == $check ]; then
+		stop=1
+	    fi
+	done
 
-        if [ $stop == 0 ] && [ ! -d "$arg" ]; then
-            mkdir -p "$arg" >/dev/null 2>&1
+	if [ $stop == 0 ] && [ ! -d "$arg" ]; then
+	    mkdir -p "$arg" >/dev/null 2>&1
 	    if [ $? == 0 ]; then
-            	return 0
+		return 0
 	    else
 		stop=1
 	    fi
-        else
-            stop=1
-        fi
+	else
+	    stop=1
+	fi
 
-        if [ $stop == 1 ]; then
-                echo "ERROR: Problem creating directory [$arg]"
-                exit 1
-        fi
-
+	if [ $stop == 1 ]; then
+		writelog "ERROR: Problem creating directory [$arg]" 0
+		exit 1
+	fi
 }
 ###################################################################
-# CREATE MAIN LOG DIRECTORY FOR VIB
+# CREATE MAIN LOG DIRECTORIES FOR VIB
 ###################################################################
-f_md $LOGDIR
-f_md $VIBROOT
+
+f_md $TMPDIR
+f_md $LOGDIR 
+f_md $VIBLOGS 
+
 ###################################################################
-if [ ! -f $VIB_MAIN ]; then
-	echo "ERROR: Expected to find ${VIB_MAIN}. Edit vib configuration"
-	echo "To reflect the correct location"
-fi
-###################################################################
-# Function to 'stat' a file.
+# Function to 'stat' a file
 #
 # ON MAC OSX the 'stat' command is different than on Linux
+#
 # Therefore we need to verify it is the proper version
 ###################################################################
 statfile() {
 		local file="$1"
 		local option="$2"
 		if [ -z $option ]; then
-			
-			if [ $(stat -c %y "$file"  >/dev/null 2>&1; echo $?) != 0 ]; then
-				 stat -f "%Sm" -t "%Y-%m-%d %H:%M:%S"
-			else
-				stat -c %y "$file" |cut -d. -f1
-			fi
-
-		elif [ $option == 1 ]; then 		# 1 is designated for obtaining permissions
-
-				stat -c %a "$file" 
-
-		elif [ $option == 2 ]; then		# 2 is to obtain the total size in bytes
-
-				stat -c %s "$file" 
+			writelog "ERROR: Unable to parse option in function() statfile"
+			exit 1
+		else
+			case $option in
+				perm)  stat -c %a "$file";;		# obtain file permissions in OCTAL
+				size)  stat -c %s "$file" ;;		# obtain the total size in byte
+				epoch)  stat -c %Y "$file" ;;		# obtain date in EPOCH
+				date)
+					if [ $(stat -c %y "$file"  >/dev/null 2>&1; echo $?) != 0 ]; then
+						 stat -f "%Sm" -t "%Y-%m-%dT%H:%M:%S"
+					else
+						stat -c %y "$file" |cut -d. -f1|sed 's/ /T/g'
+					fi	
+					;;
+			esac
 		fi
 }
 	
-		
+###################################################################
+if [ $(statfile $VIBLOGS perm) != "6777" ]; then
+        chmod -R 6777 $VIBLOGS  >/dev/null 2>&1
+fi
+
+###################################################################
+if [ ! -f $VIB_BINARY ]; then
+        writelog $LINE 0
+        writelog "ERROR: Expected to find [vib] in the default location: ${VIB_BINARY}. " 0
+        writelog "Please edit vib configuration. To reflect the correct location." 0
+        writelog $LINE 0
+        exit 1
+fi
+if [ ! -d $VIBLOGS ]; then
+        writelog "ERROR: Unable to create $VIBLOGS." 0
+        exit 1
+fi
 ###################################################################
 #
 # Gather User ID
@@ -377,21 +503,9 @@ if [ -z "$MYID" ]; then
 	MYID=$(whoami |tr "[:upper:]" "[:lower:]")
 fi
 ###################################################################
-# Verify VIB_SUBDIR is in the correct Format
-###################################################################
-VIB_SUBDIR=$(echo $VIB_SUBDIR|$SED 's/^\/\(.*\)\/$/\1/g')
-###################################################################
 # VERIFY BACKUP_DIRECTORY EXISTS
 ###################################################################
 f_md $BACKUP_DIRECTORY
-
-###################################################################
-# VIB_SUBDIR CHECK
-###################################################################
-if [ -z "$VIB_SUBDIR" ]; then
-	echo "ERROR: Invalid Configuration Value for VIB_SUBDIR"
-	exit 1
-fi
 
 ###################################################################
 #
@@ -402,20 +516,21 @@ fi
 ###################################################################
 DATETIME=$(date '+%Y%m%d-%H%M%S')
 EXACT_TIME=$(date '+%Y%m%d-%H%M%S.%3N')
-TMPFILE=$TMPDIR/.vib_stub.$MYID.$EXACT_TIME
-REAL_DATETIME=`date '+%Y-%m-%d %H:%M:%S'`
-YEARMONTH=`date '+%Y-%m'`
-
+TMPFILE=$TMPDIR/.vib_tempfile.$MYID.$EXACT_TIME
+REAL_DATETIME=`date '+%Y-%m-%dT%H:%M:%S'`
+YEARMONTH=$(date '+%Y%m')
 ###################################################################
 #
 # VIB LOG FILE
 #
+# Verify and setthe VIB LOG HISTORY FILE
+#
 ###################################################################
-if [ $(statfile $VIBROOT 1) != "6777" ]; then
-        chmod -R 6777 $VIBROOT  >/dev/null 2>&1
+if [ $(statfile $VIBLOGS perm) != "6777" ]; then
+        chmod -R 6777 $VIBLOGS  >/dev/null 2>&1
 fi
 
-LOGFILE="$VIBROOT/vib-history.$YEARMONTH.log"
+LOGFILE="$VIBLOGS/vib-history.$YEARMONTH.log"
 
 
 ###################################################################
@@ -456,15 +571,16 @@ NOTIME=/var/tmp/.vib.notime
 
 
 ###################################################################
-# omg_cleanup function to remove temporary files
-# *note: The 'omg' name comes from the [O]mneon[M]edia[G]rid toolset
-# that I built and used this shell wrapper for 
+# vib_cleanup function to remove temporary files
 ###################################################################
-omg_cleanup() {
-	for i in "$TMPFILE"
-	do
-		rm -f "$i" >/dev/null 2>&1 
+vib_cleanup() {
+	for i in "$@"; do
+		(rm -f "$i" >/dev/null 2>&1 )
 	done
+
+	if [ ${#@} == 0 ] || [ -f $TMPFILE ]; then
+		rm -f $TMPFILE &>/dev/null
+	fi
 }
 
 
@@ -491,8 +607,8 @@ no=0
 # If USEDIR is set to 1 and BACKUP_DIRECTORY is the default
 # post an error.
 ###################################################################
-if [ $USEDIR = 1 ] && [ "$BACKUP_DIRECTORY" = ".vib_backup" ]; then
-	echo "When you set USEDIR=1 you must also change BACKUP_DIRECTORY"
+if [ $USEDIR == 0 ] && [ "$BACKUP_DIRECTORY" = ".vib_backup" ]; then
+	writelog "When you set USEDIR=0 you must also modify BACKUP_DIRECTORY variable" 0
 	exit;
 fi
 ###################################################################
@@ -510,223 +626,13 @@ PWD=$(pwd)
 ###################################################################
 ###################################################################
 ###################################################################
-#            README
-###################################################################
-###################################################################
-###################################################################
-###################################################################
-###################################################################
-usage_details()
-{
-
-echo "
-$COMMENT_LINE
-[VI] [B]ackup utility (VIB)
-by $AUTHOR v$VERSION
-$COMMENT_LINE
-USAGE:
-$COMMENT_LINE
-This tool is designed to create backup files of any 
-file edited using the VI (VIM) editor. It allows you to 
-backup the files in a default subdirectory of
-$BACKUP_DIRECTORY, or the option to create backups in the
-'current' working directory (not advised)
-
-By default, VIB adds the user name to the file name and
-it also allows you to add the directory name to the
-file name that is saved if you back it up to a specified
-destination directory.
-
-$COMMENT_LINE
-TO RESET BACK TO THE DEFAULT WHERE:
-$COMMENT_LINE
-Issue:
-	# vi -r
-
-	This re-sets 'alias vi=/usr/bin/vim' 
-
-$COMMENT_LINE
-EXAMPLES
-$COMMENT_LINE
-
-
-$COMMENT_LINE
-EXAMPLE I
-$COMMENT_LINE
-
-This section illustrates using VIB with the default
-backup directory of $BACKUP_DIRECTORY
-
-In other words you keep all backups in one location
-
-$COMMENT_LINE
-Set the following:
-
-BACKUP_DIRECTORY=/opt/vib
-USEDIR=0
-#---------------------------
-#pwd
-/home/ovnuser
-#
-ls -al /opt/vib
-total 8
-drwxr-xr-x    2 root     root         4096 Jul 23 15:05 .
-drwxrwxrwt    3 root     root         4096 Jul 23 15:05 ..
-#
-# ls -al testfile
--rw-r--r--    1 root     root           43 Jul 23 14:11 testfile
-#
-# cat testfile
-here is some stuff
-#
-# vi testfile
-..
-<adding 'here is some more stuff'>
-:wq!
-Commit Changes [n] y
-Changes to file:testfile  Saved ...
-#
-# cat testfile
-here is some stuff
-here is some more stuff
-#
-# ls -al /opt/vib
-total 44
-drwxr-xr-x    2 ovnuser trc          4096 Jul 23 14:12 .
-drwxrwxrwx    8 root     root         4096 Jul 23 14:13 ..
--rw-r--r--    1 root     root           43 Jul 23 14:12 testfile.bpatridg.1
-#
-#
-# cat /var/tmp/viblog/testfile.bpatridg.1
-here is some stuff
-#
-#
-# vi testfile
-..
-<edit file adding 'adding even more stuff'>
-:wq!
-Commit Changes [n] y
-Changes to file: testfile Saved ...
-#
-# cat testfile
-here is some stuff
-here is some more stuff
-adding even more stuff
-#
-# ls -al /var/tmp/viblog
-total 16
-drwxr-xr-x    2 ovnuser trc          4096 Jul 23 14:18 .
-drwxrwxrwx    8 root     root         4096 Jul 23 14:17 ..
--rw-r--r--    1 root     root           43 Jul 23 14:17 testfile.bpatridg.1
--rw-r--r--    1 root     root           19 Jul 23 14:17 testfile.bpatridg.2
-#
-# cat /var/tmp/viblog/testfile.bpatridg.2
-here is some stuff
-here is some more stuff
-#
-
-
-
-$COMMENT_LINE
-EXAMPLE II
-$COMMENT_LINE
-
-This section describes saving all files in a designated
-backup location, while including the path to the files
-in the backup file name.
-
-$COMMENT_LINE
-
-
-Set the following:
-
-BACKUP_DIRECTORY=/var/tmp/viblogs
-USEDIR=1
-#---------------------------
-#pwd
-/home/ovnuser
-#
-ls -al /var/tmp/viblogs
-
-drwxr-xr-x    2 root     root         4096 Jul 23 16:24 .
-drwxrwxrwt    4 root     root         4096 Jul 23 15:11 ..
-#
-
-#
-# ls -al /home/ovnuser/testfile
--rw-r--r--    1 root     root           43 Jul 23 14:11 testfile
-#
-# cat testfile
-here is some stuff
-here is some more stuff
-#
-# vi testfile
-..
-<adding 'adding a bunch more stuff again'>
-:wq!
-Commit Changes [y] y
-Changes to file: testfile Saved ...
-#
-# cat testfile
-here is some stuff
-here is some more stuff
-adding a bunch more stuff again
-
-#
-# ls -al /var/tmp/viblog
-drwxr-xr-x    2 root     root         4096 Jul 23 16:24 .
-drwxrwxrwt    4 root     root         4096 Jul 23 15:11 ..
--rw-r--r--    1 root     root           78 Jul 23 16:21 testfile.ovnuser.testfile.1
-
-# vi testfile
-..
-<adding 'here I go again'>
-:wq!
-Commit Changes [y] y
-Changes to file: testfile Saved ...
-
-# cat testfile
-here is some stuff
-here is some more stuff
-adding a bunch more stuff again
-here I go again
-
-#
-# ls -al /var/tmp/viblog
-drwxr-xr-x    2 root     root         4096 Jul 23 16:24 .
-drwxrwxrwt    4 root     root         4096 Jul 23 15:11 ..
--rw-r--r--    1 root     root           78 Jul 23 16:21 testfile.ovnuser.testfile.1
--rw-r--r--    1 root     root           78 Jul 23 16:23 testfile.ovnuser.testfile.2
-
-
-#
-#
-# cat testfile.ovnuser.testfile.1
-here is some stuff
-here is some more stuff
-#
-#
-#
-# cat testfile.ovnuser.testfile.2
-here is some stuff
-here is some more stuff
-adding a bunch more stuff again
-#
-$COMMENT_LINE
-" |more;
-
-
-exit;
-}
-###################################################################
 usage() {
 echo $LINE
 echo "[V][I] [B]ackup Wrapper"
 echo "by $AUTHOR v$VERSION"
 echo $VIB
 echo "usage:   
-  # vi [-h|-e|-d|-l|-n|-r|-t|-v]  <file>
-	-h Display detailed help/usage
+  # vi [-e|-d|-l|-n|-r|-t|-x|-v]  <file>
 	-e Enable VIB
 	-d Disable VIB
 	-l Enable add Last Modification Date (Default is Enabled)
@@ -734,6 +640,7 @@ echo "usage:
 	-r Uninstall-Reset the alias to default
 	-t FORCE Enable add Last Modification Date to <file>
 	   *note: Default for any scripts
+	-x Set permissions to 755
 	-v Verbose (debug) output"
 echo $LINE
 
@@ -776,38 +683,20 @@ trap '
    case "$answer" in
      y|Y)
          if [ -f "$TMPFILE" ]; then
-          echo "Cleaning up then exiting ..."
-          rm -f $TMPFILE >  /dev/null 2>&1
+          writelog "Cleaning up then exiting ..."  0
+          vib_cleanup
           exit 0;
          fi
          ;;
       *)
-         echo "Returning ..."
+         writelog "Returning ..." 0 
         ;;
     esac
   else
-     echo "Returning ..."
+     writelog "Returning ..." 0
   fi
 ' 1 2
 
-###################################################################
-###################################################################
-###################################################################
-# FUNCTION TO WRITE ECHO'D OUTPUT TO INCLUDE DATE/TIME 
-# TO TTY AND/OR LOGFILE
-###################################################################
-writelog()
-{
-	LOGDATE=`date '+%Y-%m-%dT%H:%M:%S.%3N'`
-	user=`echo $MYID |tr "[:upper:]" "[:lower:]"`
-	if [ "x$2" == "x1" ] || [ "x$2" == "x2" ]; then
-		echo "[$LOGDATE] $HOSTNAME $SCRIPT: "
-	fi
-
-	if [ -z "$2"  ] || [ "x$2" == "x2" ]; then
-		echo "[$LOGDATE] $HOSTNAME $SCRIPT:  $user : | $2" >> "$LOGFILE" 2>&1
-	fi
-}
 ###################################################################
 ###################################################################
 #------------------------------------------
@@ -817,36 +706,34 @@ rotatelogs()
 {
 	#  if LOGFILE exists ...
 	if [ -f "$LOGFILE" ]; then
-	LOGSIZE=`ls -al "${LOGFILE}" |awk '{print $5}'`
+		LOGSIZE=`ls -al "${LOGFILE}" |awk '{print $5}'`
 
-	# if LOGSIZE is greater than MAXLOGSIZE
-	if [ $LOGSIZE -gt $MAXLOGSIZE ]; then
-		echo $LINE
-		printf "The $LOGFILE size is $LOGSIZE "
-		printf "\nwhich is greater than $MAXLOGSIZE \n"
-		echo $lINE
-		printf "Rotating logs ..."
-		# if MAXLOGS is greater than zero
-		  while [ $MAXLOGS -gt 0 ]
-		    do
-		       i=`expr ${MAXLOGS} - 1`
-		     if [ -f  "${LOGFILE}.${MAXLOGS}" ]; then
-		       num=`expr ${MAXLOGS} + 1`
-		       mv "${LOGFILE}.${MAXLOGS}" "${LOGFILE}.${num}"
+		# if LOGSIZE is greater than MAXLOGSIZE
+		if [ $LOGSIZE -gt $MAXLOGSIZE ]; then
+			writelog $LINE
+			writelog "The $LOGFILE size is $LOGSIZE "
+			writelog "which is greater than $MAXLOGSIZE"
+			writelog $LINE
+			printf "Rotating logs ..."
+			# if MAXLOGS is greater than zero
+			  while [ $MAXLOGS -gt 0 ]
+			    do
+			       i=`expr ${MAXLOGS} - 1`
+			     if [ -f  "${LOGFILE}.${MAXLOGS}" ]; then
+			       num=`expr ${MAXLOGS} + 1`
+			       mv "${LOGFILE}.${MAXLOGS}" "${LOGFILE}.${num}"
 
-		       if [ -f "${LOGFILE}.${MAXLOGSIZE}" ]; then 
-			rm "${LOGFILE}.${MAXLOGSIZE}" > /dev/null 2>&1
-		       fi
-		     fi
-		   printf "."
+			       if [ -f "${LOGFILE}.${MAXLOGSIZE}" ]; then 
+				rm "${LOGFILE}.${MAXLOGSIZE}" > /dev/null 2>&1
+			       fi
+			     fi
+			   printf "."
 
-		   done
-		   mv "${LOGFILE}" "${LOGFILE}.1" > /dev/null 2>&1
-		   touch "$LOGFILE"
-		 printf "\ndone\n"
+			   done
+			   mv "${LOGFILE}" "${LOGFILE}.1" > /dev/null 2>&1
+			   touch "$LOGFILE"
+			 printf "\ndone\n"
 		fi
-	else
-		echo "$LOGFILE not found "
 	fi
 }
 ###################################################################
@@ -870,14 +757,14 @@ fi
 ###################################################################
 setvib() {
 		if [ $(grep -q "alias vi=.*vib" $HOME/.bashrc; echo $?) != 0 ]; then
-			$SED -i  "s:alias vi=.*$:alias vi=\"$VIB_MAIN\":g" $HOME/.bashrc
+			$SED -i  "s:alias vi=.*$:alias vi=\"$VIB_BINARY\":g" $HOME/.bashrc
 			source $HOME/.bashrc
 		fi
 }
 ###################################################################
 check_date_change() {
-	local lm=$(head -10  "$INFILE_DIRECTORY/$INFILE_NAME"|grep -c "LAST.*MODIFIED")
-	local vc=$(head -10  "$INFILE_DIRECTORY/$INFILE_NAME"|grep -c "USING.*VIB")
+	local lm=$(head -10  "$FILE_DIRECTORY/$FILE_NAME"|grep -c "LAST.*MODIFIED")
+	local vc=$(head -10  "$FILE_DIRECTORY/$FILE_NAME"|grep -c "USING.*VIB")
 	local dc=0
 	
 	if [ $dc == 1 ]; then
@@ -892,24 +779,25 @@ check_date_change() {
 # PROCESS COMMAND LINE ARGUMENTS
 ###################################################################
 
-while getopts ':hnletvdr' OPT_NAME; do
+while getopts ':hnletxvdr' OPT_NAME; do
    case $OPT_NAME in
       (\?)
          usage
          exit 0;;
       ("h")
-         usage_details
+        usage 
          exit 0;;
+      ("x")  make_executable=1;;
       ("v")  set -x ;;
       ("t")  forcedate=1;;
       ("l") 
-		 echo $LINE
-		 echo "ENABLED ALL PREPENDING OF"
-		 echo "LAST MODIFICATION TIME"
-		 echo $LINE
-	     rm -f $NOTIME 2>/dev/null
+		echo $LINE
+		echo "ENABLED ALL PREPENDING OF"
+		echo "LAST MODIFICATION TIME"
+		echo $LINE
+	        vib_cleanup $NOTIME
 		exit
-	     ;;
+	     	;;
       ("e")  rm -f $NOVIB >/dev/null 2>&1
 		echo $LINE
 		echo "ENABLED VIB"
@@ -945,21 +833,21 @@ done
 
 if [ ! -z $setvib ]; then
 	if [ $(grep -q "alias vi=.*vib" $HOME/.bashrc; echo $?) != 0 ]; then
-		$SED -i  "s:alias vi=.*$:alias vi=\"$VIB_MAIN\":g" $HOME/.bashrc
+		$SED -i  "s:alias vi=.*$:alias vi=\"$VIB_BINARY\":g" $HOME/.bashrc
 		source $HOME/.bashrc
 	fi
 fi
 
 
 if [ -f $TMPFILE ]; then
-	rm -f $TMPFILE > /dev/null 2>&1
+	vib_cleanup
 fi
 
 if [ -z $1 ]; then
 	usage
 fi
 
-if [ $USEDIR != 0 ] && [ $BACKUP_DIRECTORY = ".vib_backup" ]; then
+if [ $USEDIR != 1 ] && [ $BACKUP_DIRECTORY == ".vib_backup" ]; then
 	echo "ERROR: BACKUP_DIRECTORY cannot equal .vib_backup when USEDIR is set ..."
 	exit;
 fi
@@ -969,7 +857,17 @@ m_readlink() {
     [ "." = "${1}" ] && n=${PWD} || n=${1}; while nn=$( readlink -n "$n" ); do n=$nn; done; echo "$n"
 }
 ###################################################################
-fp () {
+read_filename() {
+	
+	if [ $machine != "Mac" ]; then
+		f=$(readlink -f $1)
+	else
+		f=$(m_readlink $1)
+	fi
+	echo $f
+}
+###################################################################
+read_dirpath () {
 	
 	if [ $machine != "Mac" ]; then
 		f=$(readlink -f $1)
@@ -983,26 +881,46 @@ fp () {
 	echo $dir
 }
 ###################################################################
-#GATHERING INPUT
+###################################################################
+###################################################################
+# GATHERING USER SUPPLIED INPUT
+###################################################################
+###################################################################
 ###################################################################
 shopt -s extglob
-numfiles=("$@")
-total_args="${#numfiles[@]}"
+ARGUMENTS=("$@")				#ZERO ARG ARRAY
+TOTAL_ARGUMENTS="${#ARGUMENTS[@]}"			
 ca=0
-for i in "${numfiles[@]}"; do
-	if [ -f "$i" ]; then
-		INFILE_NAME=`basename "$i"`
-		INFILE_DIRECTORY=$(fp "$i")
+for i in "${ARGUMENTS[@]}"; do
+	if [ -L "$i" ]; then
+		SOFT_LINK_FILE_NAME=$(basename "$i")
+		FILE_DIRECTORY=$(read_dirpath "$i")
+		TF=$(read_filename "$i")
+		FILE_NAME=$(basename $TF)
+		SOFT_LINK=1
+		((ca++))
+	elif [ -f "$i" ]; then
+		FILE_NAME=$(basename "$i")
+		FILE_DIRECTORY=$(read_dirpath "$i")
 		((ca++))
 	fi
 done
+
 if [ $ca -gt 1 ]; then
 	echo "ERROR: You can only specify ONE File"
 	usage
 fi
-NAME=${numfiles[${#numfiles[@]}-1]}
-INFILE_NAME=$(basename $NAME)
-INFILE_DIRECTORY=$(fp "$NAME")
+#----
+if [ "$FILE_DIRECTORY" == "/" ]; then
+	FILE_DIRECTORY=
+fi
+#----
+#NAME=${ARGUMENTS[${#ARGUMENTS[@]}-1]}
+#FILE_NAME=$(basename $NAME)
+#FILE_DIRECTORY=$(read_dirpath "$NAME")
+#----
+ORIGINAL_USER_SUPPLIED_FILE_EPOCH=$(statfile "$FILE_DIRECTORY/$FILE_NAME" epoch)
+ORIGINAL_USER_SUPPLIED_FILE_SIZE=$(statfile "$FILE_DIRECTORY/$FILE_NAME" size)
 ###################################################################
 # Create backup directory
 ###################################################################
@@ -1011,12 +929,12 @@ f_md $BACKUP_DIRECTORY
 ###################################################################
 # edit file using VI_BINARY
 ###################################################################
-# if USEDIR is set to 1, then set the INFILE_NAME
+# if USEDIR is set to 1, then set the FILE_NAME
 # to the INPUT variable and change the assign
 # FULLINPUT (path+filename) to the INPUT variable
 ###################################################################
 
-if [ $USEDIR == 0 ]; then
+if [ $USEDIR == 1 ]; then
 	BACKUP_DIRECTORY=$(pwd)/.vib_backup
 fi
 
@@ -1025,7 +943,7 @@ fi
 # if backup dir doesnot exist  create backup directory
 ###################################################################
 
-BACKUP_DIRECTORY=${BACKUP_DIRECTORY}${INFILE_DIRECTORY}
+BACKUP_DIRECTORY=${BACKUP_DIRECTORY}${FILE_DIRECTORY}
 if [ ! -d "$BACKUP_DIRECTORY"  ] && [ -z $nobackup ]; then
 	writelog $MYID "Created $BACKUP_DIRECTORY"
 	mkdir -p "$BACKUP_DIRECTORY"  > /dev/null 2>&1
@@ -1043,25 +961,25 @@ add_change_date(){
 
 
 	if [ -z $noinsert_header ]; then
-		mod_date=$(statfile "$INFILE_DIRECTORY/$INFILE_NAME")
+		mod_date=$(statfile "$FILE_DIRECTORY/$FILE_NAME" date)
 		#---------------------------------------------------------------------
 		# If the file already contains last modified
 		#---------------------------------------------------------------------
 		check_date_change
 
 			if [ $ENABLE_VIB_COMMENT == 0 ]; then
-					LC='\#$VIB_COMMENT\n$COMMENT_LINE'
+					LC="\#$VIB_COMMENT\n$COMMENT_LINE"
 			else
-					LC='$COMMENT_LINE'
+					LC="$COMMENT_LINE"
 			fi
 
 		if [ $lastmod_line -gt  0 ]; then
-			$SED -i $msedvar  "${lastmod_line}s|.*|\#LAST MODIFIED: $mod_date|" "$INFILE_DIRECTORY/$INFILE_NAME"
+			$SED -i $msedvar  "${lastmod_line}s|.*|\#LAST MODIFIED: $mod_date|" "$FILE_DIRECTORY/$FILE_NAME"
 			if [ $ENABLE_VIB_COMMENT == 0 ]; then
 				if [ $comment_line -gt 0 ]; then
-					$SED -i $msedvar  "${comment_line}s|.*|\#$VIB_COMMENT|" "$INFILE_DIRECTORY/$INFILE_NAME"
+					$SED -i $msedvar  "${comment_line}s|.*|\#$VIB_COMMENT|" "$FILE_DIRECTORY/$FILE_NAME"
 				else
-					$SED -i $msedvar  "4s|^.*|\#$VIB_COMMENT|" "$INFILE_DIRECTORY/$INFILE_NAME"
+					$SED -i $msedvar  "4s|^.*|\#$VIB_COMMENT|" "$FILE_DIRECTORY/$FILE_NAME"
 				fi
 			fi
 
@@ -1072,25 +990,25 @@ add_change_date(){
 		# OR if there is no last modify, and file is NOT a script
 		#---------------------------------------------------------------------
 		elif [[  ( ( $lastmod_line == 0 ) && ( ! -z $forcedate ) && ( -z $script ) ) || ( ( $lastmod_line == 0 ) && ( -z $script) )  ]];  then
-			$SED -i $msedvar "1i$COMMENT_LINE\n\#LAST MODIFIED: $mod_date\n$LC" "$INFILE_DIRECTORY/$INFILE_NAME"
-			echo "Added atop file -->  LAST MODIFIED: $mod_date" 
+			$SED -i $msedvar "1i$COMMENT_LINE\n\#LAST MODIFIED: $mod_date\n$LC" "$FILE_DIRECTORY/$FILE_NAME"
+			writelog "Added atop file -->  LAST MODIFIED: $mod_date" 
 
 		#---------------------------------------------------------------------
 		# IF there is no last modify, and file  IS A SCRIPT
 		#---------------------------------------------------------------------
 		elif [ $lastmod_line == 0 ] && [ ! -z $script ]; then
-			$SED -i $msedvar "2i$COMMENT_LINE\n\#LAST MODIFIED: $mod_date\n$LC" "$INFILE_DIRECTORY/$INFILE_NAME"
-			echo "Added atop file -->  LAST MODIFIED: $mod_date" 
+			$SED -i $msedvar "2i$COMMENT_LINE\n\#LAST MODIFIED: $mod_date\n$LC" "$FILE_DIRECTORY/$FILE_NAME"
+			writelog "Added atop file -->  LAST MODIFIED: $mod_date" 
 		else
-			$SED -i $msedvar "${lastmod_line}i$COMMENT_LINE\n\#LAST MODIFIED: $mod_date\n$LC" "$INFILE_DIRECTORY/$INFILE_NAME"
-			echo "Added atop file -->  LAST MODIFIED: $mod_date" 
+			$SED -i $msedvar "${lastmod_line}i$COMMENT_LINE\n\#LAST MODIFIED: $mod_date\n$LC" "$FILE_DIRECTORY/$FILE_NAME"
+			writelog "Added atop file -->  LAST MODIFIED: $mod_date" 
 		fi
 
 		#---------------------------------------------------------------------
 		# IF there is no $COMMENT_LINE after the USING VIB Comment, then add one
 		#---------------------------------------------------------------------
-		if [ $($SED -n '/#USING \[VIB\]/{n;p}' "$INFILE_DIRECTORY/$INFILE_NAME" |grep -e '#############' -c) == 0 ]; then
-			$SED -i $msedvar "/USING \[VIB\]/a $COMMENT_LINE/" "$INFILE_DIRECTORY/$INFILE_NAME"
+		if [ $($SED -n '/#USING \[VIB\]/{n;p}' "$FILE_DIRECTORY/$FILE_NAME" |grep -e '#############' -c) == 0 ]; then
+			$SED -i $msedvar "/USING \[VIB\]/a $COMMENT_LINE/" "$FILE_DIRECTORY/$FILE_NAME"
 		fi
 	fi
 
@@ -1099,26 +1017,18 @@ add_change_date(){
 # checking to see if file is a script, and if so, then add file modification date
 ###################################################################
 check_lastmod_header() {
-	head -5 "$INFILE_DIRECTORY/$INFILE_NAME" |awk 'BEGIN{c=0} $0 ~ /LAST MODIFIED/ {c=NR}END{print c}'
+	head -5 "$FILE_DIRECTORY/$FILE_NAME" |awk 'BEGIN{c=0} $0 ~ /LAST MODIFIED/ {c=NR}END{print c}'
 }
 
 check_comment_header() {
-	head -10 "$INFILE_DIRECTORY/$INFILE_NAME" |awk 'BEGIN{c=0} $0 ~ /USING*VIB/ {c=NR}END{print c}'
+	head -10 "$FILE_DIRECTORY/$FILE_NAME" |awk 'BEGIN{c=0} $0 ~ /USING*VIB/ {c=NR}END{print c}'
 }
 
 ###################################################################
 # check to see if the file is a script
 ###################################################################
-check_script() {
-	if [ $(head -1 "$INFILE_DIRECTORY/$INFILE_NAME"|grep -q "\#.*bin\/bash"; echo $? ) == 0 ]; then
-		script=1	
-	elif [ $(head -1 "$INFILE_DIRECTORY/$INFILE_NAME"|grep -q "\#.*bin\/perl"; echo $? ) == 0 ]; then
-		script=1	
-	elif [ $(head -1 "$INFILE_DIRECTORY/$INFILE_NAME"|grep -q "\#.*bin\/sh"; echo $? ) == 0 ]; then
-		script=1	
-	elif [ $(head -1 "$INFILE_DIRECTORY/$INFILE_NAME"|grep -q "\#.*bin\/ksh"; echo $? ) == 0 ]; then
-		script=1	
-	elif [ $(head -1 "$INFILE_DIRECTORY/$INFILE_NAME"|grep -q "\#.*bin\/zsh"; echo $? ) == 0 ]; then
+check_ifis_script() {
+	if [ $(head -1 "$FILE_DIRECTORY/$FILE_NAME"|grep -q '\#\!.*bin.*[k|tc|z|c|ba]sh'; echo $? ) == 0 ] || [ $(head -1 "$FILE_DIRECTORY/$FILE_NAME"|grep -q '\#\!.*perl'; echo $? ) == 0 ] || [ $(head -1 "$FILE_DIRECTORY/$FILE_NAME"|grep -q "\#\!.*python"; echo $? ) == 0 ]; then
 		script=1	
 	else
 		script=
@@ -1134,10 +1044,10 @@ check_script() {
 # Determine if the file type is of a script and should include the date/modification time
 ###################################################################
 
-if [ ! -f $NOTIME ] && [ -f "$INFILE_DIRECTORY/$INFILE_NAME" ]; then
-	lastmod_line=$(check_lastmod_header)
-	comment_line=$(check_comment_header)
-	check_script
+if [ ! -f $NOTIME ] && [ -f "$FILE_DIRECTORY/$FILE_NAME" ]; then
+	lastmod_line=$(check_lastmod_header)		# check to see if the LAST MODIFIED time is atop the file
+	comment_line=$(check_comment_header)		# check to see if the optional VIB HEADER is atop the file
+	check_ifis_script
 fi
 
 ###################################################################
@@ -1145,42 +1055,46 @@ fi
 # check the filesize to see if it exceeds the max file size to edit and backup a file
 #
 ###################################################################
-
-if [ -f "$INFILE_DIRECTORY/$INFILE_NAME" ]; then
-	if  [ $(statfile $INFILE_DIRECTORY/$INFILE_NAME 2) -gt $MAX_INFILE_SIZE ]; then
-		echo "Unable to backup file as MAX_INFILE_SIZE -->$MAX_INFILE_SIZE"
+file_not_exist() {
+        writelog "No changes made. File [$FILE_DIRECTORY/$FILE_NAME] does not exist. Exiting.."
+        exit 1
+}
+###################################################################
+if [ -f "$FILE_DIRECTORY/$FILE_NAME" ]; then
+	if  [ $(statfile $FILE_DIRECTORY/$FILE_NAME size) -gt $MAX_USER_SUPPLIED_FILE_SIZE ]; then
+		writelog "Unable to backup file as MAX_USER_SUPPLIED_FILE_SIZE -->$MAX_USER_SUPPLIED_FILE_SIZE"
 		sleep 1
-		"$VI_BINARY" "$INFILE_DIRECTORY/$INFILE_NAME"
+		"$VI_BINARY" "$FILE_DIRECTORY/$FILE_NAME"
 		exit
 	fi
 fi
 
 # IF the file does not exist (i.e. path to file)
-if [ ! -f "$INFILE_DIRECTORY/$INFILE_NAME" ]; then
+if [ ! -f "$FILE_DIRECTORY/$FILE_NAME" ]; then
 	if [[ (( -n "$2" ) && ( "$2" = "n" )) || ( $MAKE_NEW == 1 )  ]]; then
-		echo "Creating $INFILE_NAME"
-		"$VI_BINARY" "$INFILE_DIRECTORY/$INFILE_NAME"
-		if [ ! -f "$INFILE_DIRECTORY/$INFILE_NAME" ]; then
-			no=1
+		writelog "Creating $FILE_NAME"
+		"$VI_BINARY" "$FILE_DIRECTORY/$FILE_NAME"
+		if [ ! -f "$FILE_DIRECTORY/$FILE_NAME" ]; then
+			file_not_exist
 		else
-			cp -pf "$INFILE_DIRECTORY/$INFILE_NAME" "$BACKUP_DIRECTORY/${INFILE_NAME}.${MYID}.0" > /dev/null 2>&1
+			cp -pf "$FILE_DIRECTORY/$FILE_NAME" "$BACKUP_DIRECTORY/${FILE_NAME}.${MYID}.0" > /dev/null 2>&1
 			newfile=1
 		fi
 	else
-		echo "File not found. To create new file enter '#>vi <file> n'";
+		writelog "File not found. To create new file enter '#>vi <file> n'";
 		exit;
 	fi
 
 else
 
-	if [ ! -f "$BACKUP_DIRECTORY/${INFILE_NAME}.${MYID}.1" ] && [ -z $nobackup ]; then 
-		cp -p -f "$INFILE_DIRECTORY/$INFILE_NAME" "$BACKUP_DIRECTORY/${INFILE_NAME}.${MYID}.1" > /dev/null 2>&1
+	if [ ! -f "$BACKUP_DIRECTORY/${FILE_NAME}.${MYID}.1" ] && [ -z $nobackup ]; then 
+		cp -p -f "$FILE_DIRECTORY/$FILE_NAME" "$BACKUP_DIRECTORY/${FILE_NAME}.${MYID}.1" > /dev/null 2>&1
 	fi
-	cp -pf "$INFILE_DIRECTORY/$INFILE_NAME" "$TMPFILE" > /dev/null 2>&1
-	"$VI_BINARY" "$INFILE_DIRECTORY/$INFILE_NAME"
+	cp -pf "$FILE_DIRECTORY/$FILE_NAME" "$TMPFILE" > /dev/null 2>&1
+	"$VI_BINARY" "$FILE_DIRECTORY/$FILE_NAME"
 
-	if [ ! -f "$INFILE_DIRECTORY/$INFILE_NAME" ]; then
-		no=1
+	if [ ! -f "$FILE_DIRECTORY/$FILE_NAME" ]; then
+		file_not_exist
 	fi
 fi
 
@@ -1189,26 +1103,33 @@ fi
 # Comparing new changes to the original file
 #
 ###################################################################
-if [ $no == 1 ]; then
-	echo "No changes. File does not exist. Exiting.."
-	exit
-elif [ ! -z $newfile ]; then
-	echo "Created new file --> $INFILE_DIRECTORY/$INFILE_NAME"
-	omg_cleanup
+compare_files() {
+	if [ $ORIGINAL_USER_SUPPLIED_FILE_SIZE == $(statfile "$FILE_DIRECTORY/$FILE_NAME" size ) ]; then
+		echo 0
+	else
+		echo 1
+	fi
+}
+###################################################################
+compare_files_num() { 
+		local e=$(statfile "$FILE_DIRECTORY/$FILE_NAME" size)
+		echo $(expr $e - $ORIGINAL_USER_SUPPLIED_FILE_SIZE)
+}
+###################################################################
+if [ ! -z $newfile ]; then
+	writelog "Created new file --> $FILE_DIRECTORY/$FILE_NAME"
+	vib_cleanup
 	exit 0
 else
 	if [ $CONFIRM_CHANGES = 0 ]; then
 		echo ""
-		echo "Comparing changes ..."
+		writelog "Comparing changes ..."
 	fi
-	diff "$TMPFILE" "$INFILE_DIRECTORY/$INFILE_NAME" > /dev/null 2>&1
-	if [ $? != 0 ]; then
-		MAINFILE="$INFILE_DIRECTORY/$INFILE_NAME"
-	else
+	if [ $(compare_files) == 0 ]; then
 		if [ $CONFIRM_CHANGES = 0 ]; then
-			echo "No changes found ... "
+			writelog "No changes found ... "
 		fi
-		omg_cleanup
+		vib_cleanup
 		exit 0
 	fi
 fi
@@ -1229,13 +1150,17 @@ create_backupfile()
 	fi
 
 	max_files=`expr $max_files - 1`
-	for ((i=$max_files;i>=1;i--))
-	do
-		num=`expr $i + 1`
-		if [ -f  "${1}/${2}.${ID}.${i}" ]; then
-			mv -f  "${1}/${2}.${ID}.${i}" "${1}/${2}.${ID}.${num}" >/dev/null 2>&1
-		fi
-	done
+	if [ $(ls ${1}/${2}.${ID}*|wc -l 2>/dev/null ) -gt 1 ]; then
+		for ((i=$max_files;i>=1;i--)); do
+			num=`expr $i + 1`
+			if [ -f  "${1}/${2}.${ID}.${i}" ]; then
+				mv -f  "${1}/${2}.${ID}.${i}" "${1}/${2}.${ID}.${num}" >/dev/null 2>&1
+				CURRENT_BACKUP_FILE="${1}/${2}.${ID}.${num}"
+			fi
+		done
+	else
+		CURRENT_BACKUP_FILE="${1}/${2}.${ID}.1"
+	fi
 }
 ###################################################################
 
@@ -1245,15 +1170,10 @@ create_backupfile()
 # Roll versions of $INPUT (file being edited)
 #
 ###################################################################
-
-if [ "$USEDIR" -eq 0 ] && [ -z $nobackup ]; then
-	create_backupfile  "$BACKUP_DIRECTORY" "$INFILE_NAME" "${MYID}" "${MAX}" "$TMPFILE" 
-elif [ -z $nobackup ]; then
-	create_backupfile  "$BACKUP_DIRECTORY" "$INFILE_NAME" "${MYID}" "${MAX}"  "$TMPFILE" "$TMPBACKUP_DIRECTORY"
-fi
-
-if [ ! -f "$BACKUP_DIRECTORY/$INFILE_NAME.$MYID.1" ]; then
-	cp -pf  "$INFILE_DIRECTORY/$INFILE" "$BACKUP_DIRECTORY/$INFILE_NAME.$MYID.1" 2>/dev/null
+if [ "$USEDIR" -eq 1 ] && [ -z $nobackup ]; then
+	create_backupfile  "$BACKUP_DIRECTORY" "$FILE_NAME" "${MYID}" "${MAX}" "$TMPFILE" 
+else
+	create_backupfile  "$BACKUP_DIRECTORY" "$FILE_NAME" "${MYID}" "${MAX}"  "$TMPFILE" "$TMPBACKUP_DIRECTORY"
 fi
 ###################################################################
 ###################################################################
@@ -1286,45 +1206,58 @@ if [ $PROMPT = 0 ]; then
 		fi
 
 		if [ "$ans" = "y" ] || [ "$ans" = "Y" ] || [ "$ans" = "yes" ] || [ "$ans" = "" ]; then
-			if  [ $BACKUP_NOTIFICATION == 0 ]; then
-				echo "Changes to file: [$INFILE_NAME] Saved ..."
-				if [ -z $nobackup ]; then
-					echo "Backup created in $BACKUP_DIRECTORY/$INFILE_NAME.$MYID.1"
+			if [ $(compare_files) != 0 ]; then
+				if  [ $BACKUP_NOTIFICATION == 0 ]; then
+					
+					writelog "Changes to file: [$FILE_NAME] Saved ..."
+					if [ -z $nobackup ]; then
+						writelog "Backup created. $CURRENT_BACKUP_FILE"
+					fi
 				fi
+				writelog "$MYID" "$FILE_DIRECTORY/$FILE_NAME"
 			fi
-			writelog "$MYID" "$INFILE_DIRECTORY/$INFILE_NAME"
-			rm -f "$TMPFILE" > /dev/null 2>&1
+			vib_cleanup
 			c=0
 		else
-			echo "Restoring original..."
-			mv -f "$TMPFILE" "$INFILE_DIRECTORY/$INFILE_NAME" > /dev/null 2>&1
+			writelog "Restoring original..."
+			mv -f "$TMPFILE" "$FILE_DIRECTORY/$FILE_NAME" > /dev/null 2>&1
 		fi
 	elif [ "$2" = "n" ]; then
 		if  [ $BACKUP_NOTIFICATION == 0 ]; then
-			echo "Changes to file: [$INFILE_NAME] Saved ..."
-			if [ -z $nobackup ]; then
-				printf "Backup File:\n$BACKUP_DIRECTORY/$INFILE_NAME.$MYID.1\n"
+			if [ $(compare_files) != 0 ]; then
+				writelog "Changes to file: [$FILE_NAME] Saved ..."
+				if [ -z $nobackup ]; then
+					printf "Backup File:\n$CURRENT_BACKUP_FILE\n"
+				fi
 			fi
 		fi
-		writelog "$MYID" "$INFILE_DIRECTORY/$INFILE_NAME"
-		rm -f "$TMPFILE" > /dev/null 2>&1
+		writelog "$MYID" "$FILE_DIRECTORY/$FILE_NAME"
+		vib_cleanup
 	fi
 
 		 
 else
 	if  [ $BACKUP_NOTIFICATION == 0 ]; then
-		echo "Changes Automatically Saved ..."
-		printf "Backup File:\n$BACKUP_DIRECTORY/$INFILE_NAME.$MYID.1\n"
+		writelog "Changes Automatically Saved ..."
+		printf "Backup File:\n$CURRENT_BACKUP_FILE\n"
 	fi
-	writelog "$MYID" "$INFILE_DIRECTORY/$INFILE_NAME" 
-	rm -f "$TMPFILE" > /dev/null 2>&1
+	writelog "$MYID" "$FILE_DIRECTORY/$FILE_NAME" 
+	vib_cleanup
 fi
 
 
 ###################################################################
+# if -x option for make executable is used, then set file to chmod 744
+###################################################################
+if [ ! -z $make_executable ]; then
+	writelog "Setting Permissions to $FILE_NAME --> 755"
+	chmod 755 "$FILE_DIRECTORY/$FILE_NAME"
+fi
+###################################################################
 # Pre-Pend the LAST MODIFIED <date/time> at the beginning of the file
-# if the file is a perl/ksh/sh/bash script OR the -t 
-# option is given
+# if the file is a perl/ksh/sh/bash script 
+# OR
+# if the '-t' argument is supplied
 ###################################################################
 if [ ! -f $NOTIME ]; then
 	add_change_date 
@@ -1336,7 +1269,7 @@ fi
 rotatelogs
 
 ###################################################################
-omg_cleanup
+vib_cleanup
 ###################################################################
 ######################### END  ####################################
 ###################################################################
